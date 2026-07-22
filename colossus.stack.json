@@ -1,0 +1,102 @@
+{
+  "certified": false,
+  "components": {
+    "backend": {
+      "backend_probe_path": "/api/docs",
+      "commands": {
+        "test": "npm test -- --maxWorkers=2",
+        "typecheck": "npx tsc --noEmit"
+      },
+      "display_name": "NestJS",
+      "fingerprint_files": [
+        "nest-cli.json"
+      ],
+      "id": "nestjs",
+      "kind": "backend",
+      "prompt_fragment": "stacks/enterprise/backend_agent.md",
+      "root_candidates": [
+        "backend"
+      ],
+      "schema_version": 1,
+      "test_tuning": {
+        "jest_max_workers": 2,
+        "ts_jest_isolated_modules": true
+      }
+    },
+    "frontend": {
+      "browser_verify": {
+        "notes": "Vue 3 SPA: no framework testability API. Wait = domcontentloaded + fixed settle + optional selector wait; vue-router createWebHistory path-routed (nginx try_files), so route probes must use real paths or in-app nav.",
+        "wait_strategy": "network_settle"
+      },
+      "commands": {
+        "build": "npx vite build",
+        "serve_dev": "npx vite"
+      },
+      "display_name": "Vue 3 + Vite (SPA)",
+      "fingerprint_files": [
+        "vite.config.ts",
+        "vite.config.js",
+        "vite.config.mjs"
+      ],
+      "fullstack_capable": false,
+      "id": "vue-vite",
+      "kind": "frontend",
+      "prompt_fragment": "stacks/vue-nest/ui_agent.md",
+      "root_candidates": [
+        "web",
+        "frontend",
+        "."
+      ],
+      "schema_version": 1,
+      "test_tuning": {
+        "jest_max_workers": 2
+      }
+    },
+    "orm": {
+      "codegen_before_typecheck": [
+        "npx prisma generate"
+      ],
+      "display_name": "Prisma",
+      "id": "prisma",
+      "kind": "orm",
+      "migrate_deploy": "npx prisma migrate deploy",
+      "prompt_fragment": "stacks/enterprise/db_agent.md",
+      "schema_file_candidates": [
+        "prisma/schema.prisma",
+        "backend/prisma/schema.prisma"
+      ],
+      "schema_version": 1,
+      "seed_path_candidates": [
+        "prisma/seed/seed.js",
+        "prisma/seed.js",
+        "backend/prisma/seed/seed.js",
+        "backend/prisma/seed.js"
+      ]
+    }
+  },
+  "display_name": "Vue + NestJS (Vite SPA + NestJS API + Prisma)",
+  "docker_targets": [
+    {
+      "context": "backend",
+      "dockerfile": "Dockerfile",
+      "label": "backend"
+    },
+    {
+      "context": "web",
+      "dockerfile": "Dockerfile.frontend",
+      "label": "frontend"
+    }
+  ],
+  "glue": {
+    "api_client": "fetch",
+    "auth_pattern": "jwt_session",
+    "frontend_api_base": "/api"
+  },
+  "known_good_dockerfiles": false,
+  "notes": "PURE RECOMBINATION combo: backend.nestjs + orm.prisma REUSED from the certified enterprise pack; only frontend.vue-vite is new. Same decoupled web/+backend/ layout and multi-service saga as react-express. known_good_dockerfiles=false (vue is non-Angular; template ships real-build Dockerfiles). Seed MUST emit SEED_CREDS_JSON; deep-link routes required; nginx try_files for vue-router.",
+  "resolved_schema_version": 1,
+  "schema_version": 1,
+  "serve_topology": "nginx_spa_plus_backend_service",
+  "stack_id": "vue-nest",
+  "template_dir": "template-vue-nest"
+}

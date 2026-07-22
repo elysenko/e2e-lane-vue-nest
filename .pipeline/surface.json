@@ -1,0 +1,15 @@
+{
+  "_generated": true,
+  "_note": "This file is overwritten by the scaffolder agent. Do not edit manually.",
+  "routes": [
+    { "method": "GET", "path": "/api/health" }
+  ],
+  "components": [
+    { "selector": "App", "file": "web/src/App.vue" },
+    { "selector": "Home", "file": "web/src/pages/Home.vue" }
+  ],
+  "testIds": [
+    { "id": "app-ready", "element": "div", "component": "App" },
+    { "id": "home-title", "element": "h1", "component": "Home" }
+  ]
+}
