@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: e2e-lane-vue-nest
+  namespace: colossus-e2e-lane-vue-nest
+  labels:
+    app: e2e-lane-vue-nest
+    managed-by: colossus
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: e2e-lane-vue-nest
+  template:
+    metadata:
+      labels:
+        app: e2e-lane-vue-nest
+    spec:
+      hostAliases:
+        - ip: "192.168.50.250"
+          hostnames:
+            - "ubuntu.desmana-truck.ts.net"
+      containers:
+        - name: app
+          image: ubuntu:30500/e2e-lane-vue-nest:latest
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: app-secrets
+                optional: true

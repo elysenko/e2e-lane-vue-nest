@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: e2e-lane-vue-nest
+  namespace: colossus-e2e-lane-vue-nest
+  labels:
+    app: e2e-lane-vue-nest
+    managed-by: colossus
+spec:
+  type: ClusterIP
+  selector:
+    app: e2e-lane-vue-nest
+  ports:
+    - port: 80
+      targetPort: 80
