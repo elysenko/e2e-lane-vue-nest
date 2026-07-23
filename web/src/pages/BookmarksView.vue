@@ -4,11 +4,7 @@ import { listBookmarks, type Bookmark } from '../lib/bookmarks';
 
 const bookmarks = ref<Bookmark[]>([]);
 const state = ref<'loading' | 'ready' | 'error'>('loading');
-const offline = ref(false);
 
-function hostname(url: string): string {
-  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
-}
 function initial(title: string): string {
   return (title.trim()[0] || '?').toUpperCase();
 }
@@ -16,11 +12,10 @@ function initial(title: string): string {
 async function load() {
   state.value = 'loading';
   try {
-    const { data, offline: off } = await listBookmarks();
-    bookmarks.value = data;
-    offline.value = off;
+    bookmarks.value = await listBookmarks();
     state.value = 'ready';
   } catch {
+    // Backend down / network failure -> genuine error state (no fabricated data).
     state.value = 'error';
   }
 }
@@ -38,14 +33,6 @@ onMounted(load);
       <RouterLink to="/bookmarks/new" class="btn btn-primary" data-testid="add-bookmark">
         <span>＋</span> Add
       </RouterLink>
-    </div>
-
-    <div v-if="offline && state === 'ready'" class="banner banner-warning" data-testid="offline-banner">
-      <span>⚠️</span>
-      <span>
-        <strong>Showing example data</strong>
-        The bookmarks service is unreachable — displaying the default seeded list.
-      </span>
     </div>
 
     <!-- Loading -->
@@ -89,7 +76,7 @@ onMounted(load);
         <span class="bm-favicon">{{ initial(b.title) }}</span>
         <span class="bm-body">
           <span class="bm-title">{{ b.title }}</span>
-          <span class="bm-url">{{ hostname(b.url) }}</span>
+          <span class="bm-url">{{ b.url }}</span>
         </span>
         <span class="bm-open" aria-hidden="true">↗</span>
       </a>

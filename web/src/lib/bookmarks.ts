@@ -1,6 +1,6 @@
-// Bookmarks data access. Wires to the real backend (GET/POST /api/bookmarks) but, so the
-// preview mockup renders a populated UI when no backend is attached, it falls back to a
-// local seed set that mirrors the server's first-load seeding of 3 example bookmarks.
+// Bookmarks data access. Wires directly to the real backend (GET/POST /api/bookmarks).
+// Failures are surfaced to the caller (throw / ok:false) so the UI can show a genuine
+// error state — never a fabricated "success" or fake seed data.
 import { api, ApiError } from './api';
 
 export interface Bookmark {
@@ -10,30 +10,12 @@ export interface Bookmark {
   createdAt: string;
 }
 
-const SEED: Bookmark[] = [
-  { id: 'seed-1', title: 'Vue.js Documentation', url: 'https://vuejs.org/guide/introduction.html', createdAt: '2026-07-20T09:00:00Z' },
-  { id: 'seed-2', title: 'NestJS Documentation', url: 'https://docs.nestjs.com/', createdAt: '2026-07-20T09:01:00Z' },
-  { id: 'seed-3', title: 'PostgreSQL Documentation', url: 'https://www.postgresql.org/docs/', createdAt: '2026-07-20T09:02:00Z' },
-];
-
-// Local fallback store (mockup only — the backend is the source of truth in production).
-let local: Bookmark[] | null = null;
-function localStore(): Bookmark[] {
-  if (!local) local = SEED.map((b) => ({ ...b }));
-  return local;
-}
-
-export async function listBookmarks(): Promise<{ data: Bookmark[]; offline: boolean }> {
-  try {
-    const data = await api<Bookmark[]>('/bookmarks');
-    return { data, offline: false };
-  } catch (e) {
-    // Network failure or backend down -> show the intended UI with local seed data.
-    if (e instanceof TypeError || e instanceof ApiError) {
-      return { data: localStore(), offline: true };
-    }
-    return { data: localStore(), offline: true };
-  }
+/**
+ * Fetch the bookmark list from the backend. On network/DB failure this rejects so the
+ * caller renders a real error state (spec: "graceful error state rather than a crash").
+ */
+export async function listBookmarks(): Promise<Bookmark[]> {
+  return api<Bookmark[]>('/bookmarks');
 }
 
 export interface CreateResult {
@@ -42,6 +24,11 @@ export interface CreateResult {
   fieldErrors?: Record<string, string>;
 }
 
+/**
+ * Create a bookmark. A 400 (validation) resolves to { ok:false, fieldErrors } so the form
+ * can highlight fields. Any other failure (network, 503, 5xx) is re-thrown so the caller's
+ * catch shows a real error — we never fabricate a successful save.
+ */
 export async function createBookmark(input: { title: string; url: string }): Promise<CreateResult> {
   try {
     const bookmark = await api<Bookmark>('/bookmarks', {
@@ -53,15 +40,8 @@ export async function createBookmark(input: { title: string; url: string }): Pro
     if (e instanceof ApiError && e.status === 400) {
       return { ok: false, fieldErrors: mapValidation(e.body) };
     }
-    // Offline mockup: persist to the local store so the new row appears in the list.
-    const bookmark: Bookmark = {
-      id: 'local-' + localStore().length,
-      title: input.title,
-      url: input.url,
-      createdAt: '2026-07-22T12:00:00Z',
-    };
-    localStore().unshift(bookmark);
-    return { ok: true, bookmark };
+    // Network failure / 503 / other server error — propagate a real failure.
+    throw e;
   }
 }
 

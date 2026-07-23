@@ -26,9 +26,8 @@ async function submit() {
     if (e instanceof ApiError && e.status === 401) {
       error.value = 'Invalid email or password.';
     } else {
-      // Mockup: no backend attached — proceed to the settings screen for preview.
-      localStorage.setItem('token', 'preview-admin-token');
-      router.push('/admin/settings');
+      // Real failure (network / server error) — show an error, never fabricate a session.
+      error.value = 'Unable to sign in right now. Please try again.';
     }
   } finally {
     submitting.value = false;

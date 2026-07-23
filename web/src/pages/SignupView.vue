@@ -30,8 +30,8 @@ async function submit() {
     if (e instanceof ApiError && e.status === 409) {
       error.value = 'An account with this email already exists.';
     } else {
-      localStorage.setItem('token', 'preview-user-token');
-      router.push('/bookmarks');
+      // Real failure (network / server error) — show an error, never fabricate a session.
+      error.value = 'Unable to create your account right now. Please try again.';
     }
   } finally {
     submitting.value = false;
