@@ -31,7 +31,7 @@ onMounted(load);
   <section data-testid="bookmarks-view">
     <div class="page-head">
       <div>
-        <h1 class="page-title" data-testid="bookmarks-title">My Bookmark List</h1>
+        <h1 class="page-title" data-testid="bookmarks-title">My Bookmarks</h1>
         <p class="page-sub">Everything you've saved to read later.</p>
       </div>
       <RouterLink to="/bookmarks/new" class="btn btn-primary" data-testid="add-bookmark">
