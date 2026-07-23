@@ -12,7 +12,7 @@ const router = createRouter({
       path: '/bookmarks',
       name: 'bookmarks',
       component: () => import('./pages/BookmarksView.vue'),
-      meta: { flow: 'bookmarks.list', title: 'My Bookmarks' },
+      meta: { flow: 'bookmarks.list', title: 'My Bookmark List' },
     },
     {
       path: '/bookmarks/new',
