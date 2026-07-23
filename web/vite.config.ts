@@ -6,7 +6,7 @@ import vue from '@vitejs/plugin-vue';
 // and colossus.stack.json) and passes NO --base flag, so it is baked in here directly.
 // vue-router derives its base from import.meta.env.BASE_URL, which equals this value.
 export default defineConfig({
-  base: '/e2e-lane-vue-nest/',
+  base: '/',
   plugins: [vue()],
   build: { outDir: 'dist' },
   server: {
