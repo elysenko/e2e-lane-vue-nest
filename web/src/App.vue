@@ -17,7 +17,7 @@
       </nav>
 
       <RouterLink to="/bookmarks/new" class="btn btn-primary header-cta">
-        <span>＋</span> Add Bookmark
+        <span>+</span> New Bookmark
       </RouterLink>
     </header>
 
