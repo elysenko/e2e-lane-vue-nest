@@ -4,6 +4,7 @@ import { listBookmarks, type Bookmark } from '../lib/bookmarks';
 
 const bookmarks = ref<Bookmark[]>([]);
 const state = ref<'loading' | 'ready' | 'error'>('loading');
+const offline = ref(false);
 
 function initial(title: string): string {
   return (title.trim()[0] || '?').toUpperCase();
@@ -12,10 +13,13 @@ function initial(title: string): string {
 async function load() {
   state.value = 'loading';
   try {
-    bookmarks.value = await listBookmarks();
+    const { data, offline: off } = await listBookmarks();
+    bookmarks.value = data;
+    offline.value = off;
     state.value = 'ready';
   } catch {
-    // Backend down / network failure -> genuine error state (no fabricated data).
+    // Server responded with an error (e.g. 503 when the DB is down) -> genuine error state.
+    offline.value = false;
     state.value = 'error';
   }
 }
@@ -33,6 +37,14 @@ onMounted(load);
       <RouterLink to="/bookmarks/new" class="btn btn-primary" data-testid="add-bookmark">
         <span>＋</span> Add
       </RouterLink>
+    </div>
+
+    <div v-if="offline && state === 'ready'" class="banner banner-warning" data-testid="offline-banner">
+      <span>⚠️</span>
+      <span>
+        <strong>Showing example data</strong>
+        The bookmarks service is unreachable — displaying the default seeded list.
+      </span>
     </div>
 
     <!-- Loading -->
